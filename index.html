@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="uz"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Ko'r yozuv: 30 kunlik protokol</title>
+<style>
+:root{--bg:#eef2f5;--fg:#101a24;--mut:#5d6b78;--card:#fff;--bd:#d5dde4;--key:#2b59c3;--keyt:#fff;--old:#cfdcf5;--hot:#f2b705;--ok:#1f8a5b;--bad:#c2410c;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f151b;--fg:#e6edf3;--mut:#93a1ae;--card:#17202a;--bd:#263340;--key:#6f95f2;--keyt:#0f151b;--old:#243454;--hot:#f2b705;--ok:#4cc08d;--bad:#f08a55}}
+:root[data-theme="dark"]{--bg:#0f151b;--fg:#e6edf3;--mut:#93a1ae;--card:#17202a;--bd:#263340;--key:#6f95f2;--keyt:#0f151b;--old:#243454;--hot:#f2b705;--ok:#4cc08d;--bad:#f08a55}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.w{max-width:760px;margin:0 auto;padding:14px}
+h1{font-size:1.35rem;margin:4px 0}h2{font-size:1.1rem;margin:0 0 8px}h3{font-size:1rem;margin:14px 0 6px}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:14px;margin:12px 0}
+.mut{color:var(--mut);font-size:.9rem}
+.bar{height:8px;background:var(--bd);border-radius:4px;overflow:hidden}.bar i{display:block;height:100%;background:var(--ok)}
+nav{display:flex;gap:6px;overflow-x:auto;position:sticky;top:env(safe-area-inset-top,0px);background:var(--bg);padding:8px 0;z-index:5}
+nav button{flex:none}
+button,input,select,textarea{font:inherit;color:var(--fg)}
+button{background:var(--card);border:1px solid var(--bd);border-radius:8px;padding:8px 12px;cursor:pointer}
+button.on,button.p{background:var(--key);color:var(--keyt);border-color:var(--key)}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--hot);outline-offset:1px}
+input,select,textarea{background:var(--bg);border:1px solid var(--bd);border-radius:8px;padding:8px;width:100%}
+.g{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.ck{display:flex;gap:10px;align-items:flex-start;padding:8px 0;border-bottom:1px solid var(--bd)}
+.ck input{width:22px;height:22px;flex:none;margin:1px 0 0}
+.ck:has(input:checked) span{text-decoration:line-through;color:var(--mut)}
+.kb{display:grid;gap:4px;justify-content:center;margin:10px 0}
+.kr{display:flex;gap:4px;justify-content:center}
+.k{width:min(8.2vw,40px);height:min(8.2vw,40px);display:grid;place-items:center;border-radius:6px;border:1px solid var(--bd);font:600 .95rem ui-monospace,Menlo,Consolas,monospace;opacity:.4}
+.k.o{background:var(--old);opacity:1}.k.n{background:var(--key);color:var(--keyt);opacity:1;transform:translateY(-2px);box-shadow:0 3px 0 var(--hot)}
+.cal{display:grid;grid-template-columns:repeat(6,1fr);gap:6px}
+.cal button{padding:10px 0;text-align:center}
+.cal .f{background:var(--ok);color:#fff;border-color:var(--ok)}.cal .h{border-color:var(--hot);box-shadow:inset 0 0 0 2px var(--hot)}.cal .t{outline:3px solid var(--key)}
+.st{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}.st div{background:var(--bg);border-radius:8px;padding:10px}.st b{display:block;font-size:1.4rem}
+svg{width:100%;height:auto}table{width:100%;border-collapse:collapse;font-size:.88rem}td,th{padding:5px;border-bottom:1px solid var(--bd);text-align:left}
+.note{border-left:4px solid var(--hot);padding:6px 10px;margin:8px 0;background:var(--bg)}.warn{border-color:var(--bad)}
+section{display:none}section.s{display:block}
+@media print{nav,.noprint{display:none}section{display:block!important;break-after:page}body{background:#fff;color:#000}.card{border-color:#999}}
+</style></head><body><div class="w">
+<h1>Ko'r yozuv: 30 kunlik protokol</h1>
+<div id="hd"></div>
+<nav id="nv"></nav>
+<section id="t-today"></section><section id="t-cal"></section><section id="t-res"></section><section id="t-rem"></section><section id="t-pro"></section>
+</div>
+<script>
+const K='kyz1',pad=n=>String(n).padStart(2,'0');
+let S=null;try{S=JSON.parse(localStorage.getItem(K))}catch(e){}
+S=S||{start:null,done:{},logs:[],rem:{am:'08:00',pm:'20:30',on:false}};
+const save=()=>{try{localStorage.setItem(K,JSON.stringify(S))}catch(e){}};
+const td=()=>{const d=new Date();return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())};
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const dayOf=dt=>{if(!S.start)return 1;const n=Math.round((new Date(dt+'T00:00')-new Date(S.start+'T00:00'))/864e5)+1;return Math.min(30,Math.max(1,n))};
+let sel=null,tab='today';const cur=()=>sel||dayOf(td());
+const T=[`Asosiy qator: A S D F J K L ;`,`Asosiy qator + G, H`,`Yuqori qator: E, I, R, U`,`Yuqori qator: T, Y, W, O, Q, P`,`Pastki qator: C, M, V, N, B`,`X, Z, vergul, nuqta; hammasi aralash`,`Dam kuni`,`Shift va bosh harflar`,`O', G' (apostrof) va sh, ch, ng`,`Eng ko'p uchraydigan so'zlar`,`Zaif harflaringiz`,`Qisqa gaplar va tinish belgilari`,`Takrorlash + 3 daqiqalik sinov`,`Dam kuni`,`Qo'shimchalar: -lar, -ning, -dan, -ish`,`Uzun so'zlar, qo'l almashinuvi ritmi`,`Bir qo'lda yoziladigan qiyin so'zlar`,`Raqamlar qatori`,`5 daqiqa to'xtamasdan yozish`,`Zaif nuqtalar + sinov`,`Dam kuni`,`Dikta: o'qib, xotiradan yozish`,`1 daqiqalik sprintlar + sekin sifatli seans`,`Aniqlik kuni (tezlik 20% past)`,`Haqiqiy ish: xat, chat, hujjat`,`Zaif nuqtalar va qiyin birikmalar`,`10 daqiqa to'xtamasdan yozish`,`Dam kuni`,`Yakuniy 5 daqiqalik sinov`,`Natijani 1-kun bilan solishtirish`];
+const NK={1:'asdfjkl;',2:'gh',3:'eiru',4:'twyopq',5:'cmvnb',6:'xz,.',9:"'",18:'1234567890'};
+const ROWS=['1234567890','qwertyuiop','asdfghjkl;\'','zxcvbnm,.'];
+const REST=[7,14,21,28];
+function steps(d){
+ if(REST.includes(d))return{am:[`Ixtiyoriy: 5 daqiqa yengil takrorlash`],pm:[`Dam yoki 10 daqiqa yengil takrorlash`,`Qo'l, yelka va ko'z cho'zilishi (2 daq)`]};
+ const t=T[d-1],bk=d>=22?`Kitobdan abzas: 10 daqiqa`:d>=15?`Kitob abzasi: 5-10 daqiqa`:d>=8?`Kitob abzasi: 3-5 daqiqa`:null;
+ const pm=[`Isitish: sekin, oson matn (2 daq)`,`Yangi material: ${t} (10 daq). 45-60 soniya yozing, 5-10 soniya tanaffus`,`Stretch: odatdagidan 10-20% tezroq (3 daq)`];
+ if(bk)pm.push(bk);
+ pm.push(`Cho'zilish va uzoqqa qarash (1-2 daq)`);
+ const am=[`Qo'l va bilakni isitish (1 daq)`,`Kechagi mavzu va zaif harflar (8-10 daq), 45-60 soniyalik bo'laklar`];
+ if(d===1)pm.unshift(`Boshlang'ich test: 3 ta 60 soniyalik test, natijani yozing (qarab yozish mumkin)`);
+ return{am,pm};
+}
+const dayRatio=d=>{const p=steps(d);let n=0,t=0;['am','pm'].forEach(s=>p[s].forEach((_,i)=>{t++;if(S.done[d+':'+s+':'+i])n++}));return t?n/t:0};
+function tg(k,v){if(v)S.done[k]=1;else delete S.done[k];save();hd();rCal()}
+function hd(){let f=0;for(let d=1;d<=30;d++)if(dayRatio(d)===1)f++;
+ document.getElementById('hd').innerHTML=`<div class="mut">${S.start?`Bugun: ${dayOf(td())}-kun`:`Hali boshlanmagan`}. To'liq bajarilgan kunlar: ${f}/30</div><div class="bar"><i style="width:${f/30*100}%"></i></div>`}
+function nav(){const L={today:'Bugun',cal:'Kalendar',res:'Natijalar',rem:'Eslatma',pro:'Protokol'};
+ document.getElementById('nv').innerHTML=Object.keys(L).map(k=>`<button class="${k===tab?'on':''}" onclick="go('${k}')">${L[k]}</button>`).join('');
+ document.querySelectorAll('section').forEach(s=>s.classList.toggle('s',s.id==='t-'+tab))}
+function go(k){tab=k;nav();R()}
+function kb(d){let old='',nw=NK[d]||'';for(let i=1;i<d;i++)old+=NK[i]||'';if(d>=2&&d<=6)old=Object.keys(NK).filter(x=>x<d).map(x=>NK[x]).join('');if(d>6)old=Object.keys(NK).filter(x=>x<=d&&x>0).map(x=>NK[x]).join('');
+ if(d>=7&&d!==9&&d!==18){old+=NK[9]&&d>9?NK[9]:'';}
+ return`<div class="kb">`+ROWS.map(r=>`<div class="kr">`+[...r].map(c=>`<div class="k ${nw.includes(c)?'n':old.includes(c)?'o':''}">${c}</div>`).join('')+`</div>`).join('')+`</div><div class="mut">Ko'k yorug' tugmalar bugungi yangi harflar. F va J tugmalaridagi do'ngchalar ko'rsatkich barmoqlaringiz joyini bildiradi.</div>`}
+function rToday(){const d=cur(),p=steps(d),wk=Math.ceil(d/7);let h='';
+ if(!S.start)h+=`<div class="card"><h2>Boshlash</h2><p class="mut">Boshlanish sanasini belgilang. Kunlar shu sanadan hisoblanadi.</p><input type="date" id="sd" value="${td()}"><p><button class="p" onclick="S.start=document.getElementById('sd').value||td();save();R();hd()">Protokolni boshlash</button></p></div>`;
+ h+=`<div class="card"><div style="display:flex;justify-content:space-between;gap:8px"><button onclick="sel=Math.max(1,cur()-1);R()" aria-label="Oldingi kun">‹</button><div style="text-align:center"><h2 style="margin:0">${d}-kun</h2><div class="mut">${wk}-hafta</div></div><button onclick="sel=Math.min(30,cur()+1);R()" aria-label="Keyingi kun">›</button></div>
+ <h3>Bugun nimani o'rganaman</h3><p style="font-size:1.1rem;margin:0"><b>${T[d-1]}</b></p>${d<=18||NK[d]?kb(d):''}
+ <div class="note">${wk===1?`Kitob yo'q. Faqat tartibli darslar. Qarab yozmang: qo'llaringizni yupqa mato bilan yoping.`:wk===2?`Hamma harflar. Kitobdan qisqa abzas ko'chirasiz. Xatoda to'xtamang.`:wk===3?`Avtomatlashtirish: ko'z oldinga, 2-3 so'z keyinga qarasin.`:`Ongsizlik darajasi: barmoqlarga emas, matn oqimiga e'tibor bering.`}</div></div>`;
+ [['am','Ertalab (10-12 daq)'],['pm','Kechqurun, ovqatdan keyin (20-22 daq)']].forEach(([s,n])=>{h+=`<div class="card"><h2>${n}</h2>`+p[s].map((t,i)=>{const k=d+':'+s+':'+i;return`<label class="ck"><input type="checkbox" ${S.done[k]?'checked':''} onchange="tg('${k}',this.checked)"><span>${t}</span></label>`}).join('')+`</div>`});
+ h+=`<div class="card"><h2>Natijani yozish</h2><div class="g"><div>Seans<select id="ls"><option>Ertalab</option><option>Kechqurun</option></select></div><div>Tezlik (so'z/daq)<input id="lw" type="number" min="0" inputmode="numeric"></div><div>Aniqlik (%)<input id="la" type="number" min="0" max="100" inputmode="decimal"></div><div>Charchoq (1-5)<input id="lf" type="number" min="1" max="5" inputmode="numeric"></div></div><p>Zaif harflar<input id="lk" placeholder="masalan: q, p, z"></p><button class="p" onclick="addLog()">Natijani saqlash</button><div id="lm" class="mut" role="status"></div></div>`;
+ document.getElementById('t-today').innerHTML=h}
+function addLog(){const w=parseFloat(lw.value),a=parseFloat(la.value);if(isNaN(w)||isNaN(a)){lm.textContent=`Tezlik va aniqlikni kiriting.`;return}
+ S.logs.push({date:td(),day:cur(),s:ls.value,w,a,f:parseInt(lf.value)||0,k:lk.value});save();lm.textContent=`Saqlandi: ${w} so'z/daq, ${a}%`;lw.value=la.value=lf.value=lk.value='';}
+function rCal(){let h=`<div class="card"><h2>Kalendar</h2><p class="mut">Yashil: to'liq bajarilgan. Sariq hoshiya: qisman. Kunga bosing, o'sha kun rejasi ochiladi.</p><div class="cal">`;
+ const t=dayOf(td());for(let d=1;d<=30;d++){const r=dayRatio(d);h+=`<button class="${r===1?'f':r>0?'h':''} ${d===t&&S.start?'t':''}" onclick="sel=${d};go('today')">${d}</button>`}
+ document.getElementById('t-cal').innerHTML=h+`</div></div>`}
+function daily(){const m={};S.logs.forEach(l=>{(m[l.date]=m[l.date]||[]).push(l)});return Object.keys(m).sort().map(k=>({d:k,w:m[k].reduce((a,b)=>a+b.w,0)/m[k].length,a:m[k].reduce((a,b)=>a+b.a,0)/m[k].length}))}
+function ch(pts,mv,title,lo,hi,col,guide){const W=320,H=140,P=24;if(pts.length<1)return'';const n=Math.max(pts.length,2),x=i=>P+i*(W-P-8)/(n-1),y=v=>H-P-(v-lo)/(hi-lo)*(H-P-8);
+ const ln=a=>a.map((v,i)=>x(i)+','+y(v)).join(' ');
+ return`<h3>${title}</h3><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${title}"><line x1="${P}" y1="${H-P}" x2="${W}" y2="${H-P}" stroke="var(--bd)"/><text x="2" y="${y(hi)+4}" font-size="10" fill="var(--mut)">${Math.round(hi)}</text><text x="2" y="${y(lo)}" font-size="10" fill="var(--mut)">${Math.round(lo)}</text>${guide?`<line x1="${P}" x2="${W}" y1="${y(guide)}" y2="${y(guide)}" stroke="var(--bad)" stroke-dasharray="3 3"/>`:''}<polyline points="${ln(pts)}" fill="none" stroke="${col}" stroke-width="2" opacity=".55"/>${pts.map((v,i)=>`<circle cx="${x(i)}" cy="${y(v)}" r="3" fill="${col}"/>`).join('')}${mv?`<polyline points="${ln(mv)}" fill="none" stroke="var(--hot)" stroke-width="3"/>`:''}</svg>`}
+function rRes(){const D=daily(),L=S.logs;if(!L.length){document.getElementById('t-res').innerHTML=`<div class="card"><h2>Natijalar</h2><p>Hali natija yo'q. Bugun sahifasida birinchi natijani (boshlang'ich test) saqlang.</p></div>`+bk();return}
+ const ws=D.map(x=>x.w),as=D.map(x=>x.a),mv=ws.map((_,i)=>{const s=ws.slice(Math.max(0,i-6),i+1);return s.reduce((a,b)=>a+b,0)/s.length});
+ const avg=a=>a.reduce((x,y)=>x+y,0)/a.length,last7=ws.slice(-7),prev7=ws.slice(-14,-7),best=Math.max(...L.map(l=>l.w));
+ let f=0;for(let d=1;d<=30;d++)if(dayRatio(d)===1)f++;
+ const msg=[];msg.push(`Boshlang'ich ${ws[0].toFixed(1)} dan hozir ${ws[ws.length-1].toFixed(1)} so'z/daq (${(ws[ws.length-1]-ws[0]>=0?'+':'')}${(ws[ws.length-1]-ws[0]).toFixed(1)}).`);
+ const l3=L.slice(-3);if(l3.length===3&&l3.every(l=>l.a<95))msg.push(`!Aniqlik ketma-ket 3 natijada 95% dan past. Tezlikni 20% kamaytirib, shu kun mavzusini takrorlang.`);
+ if(prev7.length>=3&&avg(last7)-avg(prev7)<1)msg.push(`Plato: so'nggi hafta o'sish 1 so'z/daq dan kam. Zaif harflarga va stretch qismiga ko'proq vaqt bering, uyquni tekshiring.`);
+ if(D.length<=5&&ws.length>1&&ws[ws.length-1]<ws[0])msg.push(`Dastlabki kunlarda tezlik pasayishi normal: qarashni to'xtatdingiz. Davom eting.`);
+ const gap=Math.round((new Date(td())-new Date(D[D.length-1].d))/864e5);if(gap>=3)msg.push(`!${gap} kundir natija kiritilmagan. Bugun yengil seans bilan qayting, ikki baravar qilmang.`);
+ const wk={};L.forEach(l=>[...(l.k||'').toLowerCase()].filter(c=>/\S/.test(c)&&c!==',').forEach(c=>wk[c]=(wk[c]||0)+1));const top=Object.entries(wk).sort((a,b)=>b[1]-a[1]).slice(0,3).map(x=>x[0]).join(', ');
+ if(top)msg.push(`Eng ko'p xato qilinadigan harflar: ${top}. Har seansda ularga alohida 2-3 daqiqa ajrating.`);
+ const fa=L.filter(l=>l.f);if(fa.length>=3&&avg(fa.slice(-5).map(l=>l.f))>=4)msg.push(`Charchoq yuqori (4-5). Seanslarni qisqartiring va uyquni oshiring.`);
+ document.getElementById('t-res').innerHTML=`<div class="card"><h2>Natijalar</h2><div class="st"><div>So'nggi 7 kun, so'z/daq<b>${avg(last7).toFixed(1)}</b></div><div>Aniqlik, %<b>${avg(as.slice(-7)).toFixed(1)}</b></div><div>Eng yaxshi, so'z/daq<b>${best}</b></div><div>To'liq kunlar<b>${f}/30</b></div></div>`+ch(ws,mv,`Tezlik (sariq: 7 kunlik o'rtacha)`,0,Math.max(10,Math.ceil(Math.max(...ws)/10)*10),'var(--key)')+ch(as,null,`Aniqlik, % (qizil chiziq: 95%)`,80,100,'var(--ok)',95)+`</div><div class="card"><h2>Tahlil</h2>${msg.map(m=>`<div class="note ${m[0]==='!'?'warn':''}">${esc(m.replace(/^!/,''))}</div>`).join('')}</div><div class="card"><h2>So'nggi yozuvlar</h2><table><tr><th>Sana</th><th>Kun</th><th>Seans</th><th>WPM</th><th>%</th><th></th></tr>${L.slice(-10).reverse().map(l=>`<tr><td>${l.date.slice(5)}</td><td>${l.day}</td><td>${esc(l.s)}</td><td>${l.w}</td><td>${l.a}</td><td><button onclick="S.logs.splice(${L.indexOf(l)},1);save();rRes()" aria-label="O'chirish">×</button></td></tr>`).join('')}</table></div>`+bk()}
+function bk(){return`<div class="card"><h2>Zaxira</h2><p class="mut">Ma'lumotlar shu brauzerda saqlanadi. Boshqa qurilmaga ko'chirish yoki yo'qolishdan saqlash uchun matnni nusxalab qo'ying.</p><textarea id="bx" rows="3"></textarea><p><button onclick="bx.value=JSON.stringify(S)">Zaxira matnini ko'rsatish</button> <button onclick="imp()">Matndan tiklash</button></p></div>`}
+function imp(){try{const o=JSON.parse(bx.value);if(o&&o.logs){S=o;save();R();hd()}}catch(e){bx.value='Matn noto\'g\'ri.'}}
+function rRem(){const r=S.rem;document.getElementById('t-rem').innerHTML=`<div class="card"><h2>Eslatmalar</h2><div class="g"><div>Ertalabki seans<input type="time" id="ra" value="${r.am}" onchange="S.rem.am=this.value;save()"></div><div>Kechki seans<input type="time" id="rp" value="${r.pm}" onchange="S.rem.pm=this.value;save()"></div></div><p><button class="p" onclick="remOn()">${r.on?'Eslatma yoqilgan. Qayta tekshirish':'Eslatmani yoqish'}</button></p><div id="rs" class="mut" role="status"></div><div class="note warn">Brauzer eslatmasi faqat bu sahifa ochiq turganda ishlaydi. Ishonchli eslatma uchun telefonda ikkita har kunlik budilnik o'rnating yoki alohida berilgan taqvim faylini (.ics) taqvimga qo'shing.</div></div>`}
+async function remOn(){if(!('Notification' in window)){rs.textContent=`Bu brauzer bildirishnomani qo'llamaydi. Telefon budilnikidan foydalaning.`;return}
+ let p=Notification.permission;if(p!=='granted'){try{p=await Notification.requestPermission()}catch(e){}}
+ S.rem.on=p==='granted';save();rs.textContent=S.rem.on?`Yoqildi. Sahifani ochiq qoldiring.`:`Ruxsat berilmadi. Brauzer sozlamalaridan ruxsat bering.`}
+setInterval(()=>{if(!S.rem.on)return;const n=new Date(),hm=pad(n.getHours())+':'+pad(n.getMinutes());[['am','Ertalabki seans vaqti'],['pm','Kechki seans vaqti']].forEach(([k,t])=>{if(S.rem[k]===hm&&S.rem['l'+k]!==td()){S.rem['l'+k]=td();save();try{new Notification(t,{body:`Bugun: ${T[dayOf(td())-1]}`})}catch(e){}}})},20000);
+function rPro(){document.getElementById('t-pro').innerHTML=`<div class="card"><h2>Asosiy qoidalar</h2><ul><li>Kuniga 2 seans: ertalab 10-12 daqiqa, kechqurun 20-22 daqiqa. Uyquga 1-1.5 soat qolsin.</li><li>Faqat 45-60 soniya yozing, 5-10 soniya tanaffus qiling.</li><li>Klaviaturaga qaramang. Xato bo'lsa to'xtamang, oxirida zaif harflarni alohida mashq qiling.</li><li>Diqqat barmoqda emas, matn oqimida bo'lsin.</li><li>Birinchi 2 hafta faqat noutbukda mashq qiling, keyin monoblokda ham.</li><li>7-8 soat uxlang: ko'nikma uyquda mustahkamlanadi.</li></ul><h3>Aniqlik qoidasi</h3><p>3 natija ketma-ket 95% dan past bo'lsa, tezlikni 20% kamaytiring va shu mavzuni takrorlang.</p><h3>Kitoblar</h3><p>2-hafta: detektiv va jahon bestsellerlari. 3-hafta: iqtisodiyot va ilmiy kitoblar qo'shiladi. Matn lotin imlosida bo'lsin, apostrofni oddiy ' ga almashtiring.</p></div>
+<div class="card"><h2>Qo'l va bilak mashqlari</h2><p>Seansdan oldin: qo'lni isiting, mushtni yig'ib oching (10 marta), bilakni aylantiring (har tomonga 10).</p><p>Seansdan keyin: qo'lni oldinga cho'zib, kaftni yuqoriga, so'ng pastga qaratib, ikkinchi qo'l bilan 15-20 soniya torting. Barmoqlarni stolda bittadan ko'taring. Yelkani ko'tarib tashlang.</p><p><b>Karaxtlik, qadalish yoki og'riq sezsangiz, to'xtang va shifokorga ko'rining.</b></p></div>
+<div class="card"><h2>Ko'z</h2><p>Har seans oxirida uzoqqa 20-30 soniya qarang va to'liq pirpirang. Ekran 50-70 sm masofada, yuqori qirrasi ko'z darajasida bo'lsin. Dalillar aralash, lekin bu xavfsiz va bepul. Alomatlar dam olgandan keyin ham davom etsa, ko'z shifokoriga boring.</p></div>
+<div class="card"><h2>Haftalar</h2><p>1: harflar, kitob yo'q. 2: hamma harflar, kitob 3-5 daq. 3: qo'shimchalar, raqamlar, kitob 5-10 daq. 4: dikta, haqiqiy ish, yakuniy sinov.</p><p>Odat o'rtacha 66 kunda shakllanadi. 30 kun asos beradi, to'liq avtomatizm 2-3 oy talab qilishi mumkin. Bitta kunni o'tkazib yuborish zarar qilmaydi, ertasiga ikki baravar qilmang.</p><p class="noprint mut">PDF kerak bo'lsa: brauzer menyusidan "Chop etish", keyin "PDF sifatida saqlash".</p></div>`}
+function R(){rToday();rCal();rRes();rRem();rPro();hd()}
+nav();R();
+</script></body></html>
